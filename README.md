@@ -1,0 +1,4 @@
+AA
+==
+
+Automaattestijate koolitus
