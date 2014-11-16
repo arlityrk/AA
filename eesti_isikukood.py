@@ -2,24 +2,26 @@ import datetime
 import random
 
 
-def genereeri_synnikuupaev():
+def gen_synnikuupaev():
     """Genereerib suvalise kuupäeva vahemikus 01.01.1800 - sysdate. Tagastab stringina kuupäeva kujul YYYYMMDD"""
 
     delta = datetime.date.today() - datetime.date(1800, 1, 1)
     synnikuupaev = datetime.date(1800, 1, 1) + datetime.timedelta(random.randint(1, delta.days))
-    return synnikuupaev.strftime('%Y%m%d')
+    return format_synnikp(synnikuupaev)
 
 
-def genereeri_poolik_isikukood(synnikuupaev):
-    """genereeri_synnikuupaev() funktsiooniga genereeritud suvalisele kuupäevale lisatakse suvaline number vahemikus 000-999.
-    Sisendiks võtab kuupäeva formaadis YYYYMMDD. Tagastab stringina isikukoodi 1-10 numbrid"""
-
+def gen_sajand(synnikuupaev):
+    """Genereerid isikukoodi esimese numbri"""
     sajand = {'18': ('1', '2'), '19': ('3', '4'), '20': ('5', '6')}
-    poolik_isikukood = random.choice(sajand[synnikuupaev[:2]]) + synnikuupaev[2:] + str(random.randint(0, 999)).zfill(3)
-    return (poolik_isikukood)
+    return random.choice(sajand[synnikuupaev[:2]])
 
 
-def genereeri_kontrollnr(poolik_isikukood):
+def gen_jrknr():
+    """Genereerib isikukoodi 8-10 numbrid"""
+    return str(random.randint(0, 999)).zfill(3)
+
+
+def gen_kontrollnr(poolik_isikukood):
     """Genereerib genereeri_poolik_isikukood() funktsiooniga genereritud pooliku isikukoodi põhjal kontrollnumbri isikukoodile.
     Sisendiks võtab stringina isikukoodi esimesed 10 numbrit ning tagastab täieliku isikukoodi stringina"""
 
@@ -45,20 +47,45 @@ def genereeri_kontrollnr(poolik_isikukood):
                     return str(0)
 
 
-def genereeri_isikukood():
+def format_synnikp(date):
+    """Võtab sisendiks date tüüpi kuupäeva ja tagastab selle stringina YYYYMMDD formaadis"""
+    return date.strftime('%Y%m%d')
+
+
+def gen_random_isikukood():
     """Genereerib suvalise isikukoodi isikule kes on sündinud vahemikus 01.01.1800 - sysdate """
-    poolik_isikukood = genereeri_poolik_isikukood(genereeri_synnikuupaev())
-    return poolik_isikukood + genereeri_kontrollnr(poolik_isikukood)
+    synni_kp = gen_synnikuupaev()
+    isikukood = gen_sajand(synni_kp) + synni_kp[2:] + gen_jrknr()
+    isikukood += gen_kontrollnr(isikukood)
+    return isikukood
 
 
-def isikukood_kp_jargi(synnikuupaev):
-    """Genereerib isikukoodi sisendiks antud kuupäeva pealt. Sisendiks võtab kuupäeva formaadis YYYYMMDD"""
-    poolik_isikukood = genereeri_poolik_isikukood(synnikuupaev)
-    return genereeri_poolik_isikukood(synnikuupaev) + genereeri_kontrollnr(poolik_isikukood)
+def gen_isikukood_kp_ja_jrk_jargi(synnikuupaev, jrk_nr):
+    """Genereerib isikukoodi sisendiks antud kuupäeva ja jrk nr pealt. Sisendiks võtab kuupäeva formaadis YYYYMMDD"""
+    synni_kp = format_synnikp(synnikuupaev)
+    isikukood = gen_sajand(synni_kp) + synni_kp[2:] + str(jrk_nr).zfill(3)
+    isikukood += gen_kontrollnr(isikukood)
+    return isikukood
 
+
+def gen_n_isikukoodi(n):
+    """Genereerib etteantud arvu unikaalseid isikukoode"""
+    valmis = False
+    isikukoodid = []
+    algne_synnikp = datetime.date(1800, 1, 1)
+    for x in range(1, n):
+        for y in range(0, 1000):
+            isikukoodid.append(gen_isikukood_kp_ja_jrk_jargi(algne_synnikp + datetime.timedelta(x), y))
+            if len(isikukoodid) >= n:
+                valmis = True
+                break
+        if valmis:
+            break
+    return isikukoodid
 
 if __name__ == '__main__':
-    print(genereeri_isikukood())
+    print(gen_random_isikukood())
+
 
 
 
